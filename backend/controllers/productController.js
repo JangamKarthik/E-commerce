@@ -1,6 +1,7 @@
 const Product = require("../models/productModel");
 const ErrorHandler = require("../utils/errorhandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const ApiFeatures = require("../utils/apifeatures");
 
 // Create Product -- Admin route
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
@@ -14,16 +15,21 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
 });
 
 // Get All Products
-exports.getAllProducts = async(req,res) => {
-    const Products = await Product.find();
+exports.getAllProducts = catchAsyncErrors(async(req,res) => {
+
+    const resultPerPage = 5;
+    const productCount = await Product.countDocuments();
+    const apifeatures = ApiFeatures(Product.find(),req.query).search().filter().pagination(resultPerPage);
+    const Products = await apifeatures.query;
     res.status(200).json({
         success:true,
-        Products
-    })
-}
+        Products,
+        productCount,
+    });
+});
 
 // update Product--Admin
-exports.updateProduct = async(req,res,next)=>{
+exports.updateProduct = catchAsyncErrors(async(req,res,next)=>{
     let product = Product.findById(req.params.id);
     if(!product){
         return res.status(500).json
@@ -40,10 +46,10 @@ exports.updateProduct = async(req,res,next)=>{
         product
     })
 
-}
+});
 
 // Delete Product--Admin
-exports.deleteProduct = async(req,res,next)=>{
+exports.deleteProduct = catchAsyncErrors(async(req,res,next)=>{
     const product = await Product.findById(req.params.id);
 
     if(!product){
@@ -55,10 +61,10 @@ exports.deleteProduct = async(req,res,next)=>{
         success:true,
         message:"Product Deleted Successfully"
     })
-}
+});
 
 //get product details
-exports.getProductDetails = async(req,res,next)=>{
+exports.getProductDetails = catchAsyncErrors(async(req,res,next)=>{
     const product = await Product.findById(req.params.id);
     if(!product){
         return next(new ErrorHandler("Product not found",404));
@@ -68,4 +74,4 @@ exports.getProductDetails = async(req,res,next)=>{
         product
     })
 
-}
+});

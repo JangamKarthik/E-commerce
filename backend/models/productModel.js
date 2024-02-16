@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { type } = require("os");
 
 
-const productSchema = mongoose.Schema({
+const productSchema = new mongoose.Schema({
     name:{
         type:String,
         required:[true,"Please Enter the product name"],
